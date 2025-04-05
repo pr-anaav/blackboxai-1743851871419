@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Results | BlockVote</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+        .leader-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #f59e0b;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-blue-800 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">BlockVote</h1>
+            <div class="space-x-4">
+                <a href="index.html" class="hover:text-blue-200">Home</a>
+                <a href="register.html" class="hover:text-blue-200">Register</a>
+                <a href="vote.html" class="hover:text-blue-200">Vote</a>
+                <a href="results.html" class="font-semibold hover:text-blue-200">Results</a>
+                <button id="connectWallet" class="bg-white text-blue-800 px-4 py-2 rounded hover:bg-blue-100 transition">
+                    Connect Wallet
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+        <div class="max-w-6xl mx-auto">
+            <!-- Results Header -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-blue-800 mb-2">Election Results</h1>
+                        <p class="text-gray-600">Live results from the blockchain voting system</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">Last updated:</span>
+                            <span id="lastUpdated" class="font-medium">Loading...</span>
+                            <button id="refreshResults" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Summary -->
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Total Votes</p>
+                            <h3 id="totalVotes" class="text-3xl font-bold">-</h3>
+                        </div>
+                        <div class="bg-blue-100 text-blue-800 p-3 rounded-full">
+                            <i class="fas fa-vote-yea text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Registered Voters</p>
+                            <h3 id="totalVoters" class="text-3xl font-bold">-</h3>
+                        </div>
+                        <div class="bg-green-100 text-green-800 p-3 rounded-full">
+                            <i class="fas fa-users text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Voting Turnout</p>
+                            <h3 id="votingTurnout" class="text-3xl font-bold">-</h3>
+                        </div>
+                        <div class="bg-purple-100 text-purple-800 p-3 rounded-full">
+                            <i class="fas fa-percentage text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Chart -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-4">Vote Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Candidate Results -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-4">Candidate Performance</h2>
+                <div id="candidateResults" class="space-y-4">
+                    <!-- Candidate results will be dynamically inserted here -->
+                    <div class="text-center py-8">
+                        <div class="inline-block p-4 rounded-full bg-gray-100 text-gray-400 mb-4">
+                            <i class="fas fa-spinner fa-spin text-2xl"></i>
+                        </div>
+                        <p class="text-gray-500">Loading results...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Votes -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Recent Votes</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Voter</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Candidate</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tx Hash</th>
+                            </tr>
+                        </thead>
+                        <tbody id="voteHistory" class="bg-white divide-y divide-gray-200">
+                            <!-- Vote history will be dynamically inserted here -->
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i> Loading vote history...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/web3.js"></script>
+    <script src="js/results.js"></script>
+</body>
+</html>
